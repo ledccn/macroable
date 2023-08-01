@@ -40,11 +40,68 @@ $req->macro('hello', function () {
 $req->hello();
 ```
 
+## Usage
+
+You can add a new method to a class using `macro`:
+
+```php
+$macroableClass = new class() {
+    use Ledc\Macroable\Macroable;
+};
+
+$macroableClass::macro('concatenate', function(... $strings) {
+   return implode('-', $strings);
+});
+
+$macroableClass->concatenate('one', 'two', 'three'); // returns 'one-two-three'
+```
+
+Callables passed to the `macro` function will be bound to the `class`
+
+```php
+$macroableClass = new class() {
+    protected $name = 'myName';
+    use Ledc\Macroable\Macroable;
+};
+
+$macroableClass::macro('getName', function() {
+   return $this->name;
+};
+
+$macroableClass->getName(); // returns 'myName'
+```
+
+You can also add multiple methods in one go by using a mixin class. A mixin class contains methods that return callables. Each method from the mixin will be registered on the macroable class.
+
+```php
+$mixin = new class() {
+    public function mixinMethod()
+    {
+       return function() {
+          return 'mixinMethod';
+       };
+    }
+    
+    public function anotherMixinMethod()
+    {
+       return function() {
+          return 'anotherMixinMethod';
+       };
+    }
+};
+
+$macroableClass->mixin($mixin);
+
+$macroableClass->mixinMethod() // returns 'mixinMethod';
+
+$macroableClass->anotherMixinMethod() // returns 'anotherMixinMethod';
+```
+
 
 
 # 最佳实践
 
-- 宏指令方法不存在状态，无上下文依赖时：用`Ledc\Macroable\Macroable`
+- 宏指令方法不存在状态：用`Ledc\Macroable\Macroable`
 - 宏指令方法存在状态或依赖上下文时，用：`Ledc\Macroable\Macro`
 
 
